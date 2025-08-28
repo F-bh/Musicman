@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 )
 
 func main() {
@@ -45,6 +46,7 @@ func main() {
 			"-x", "--audio-format", "mp3",
 			"-S", "acodec:mp3",
 			"--embed-metadata",
+			"--download-archive", "archive.txt",
 			"--add-metadata",
 			"--postprocessor-args", "ffmpeg:-metadata album=",
 			"--embed-thumbnail",
@@ -57,6 +59,7 @@ func main() {
 		}
 
 		cmd := exec.Command(exePath, args...)
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
