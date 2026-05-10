@@ -25,7 +25,7 @@ jobs:
       run: go build -o musicman.exe main.go
       env:
         GOOS: windows
-        GOARCH: AMD64
+        GOARCH: amd64
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
