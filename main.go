@@ -65,8 +65,7 @@ func main() {
 		cmd.Stderr = os.Stderr
 
 		if err := cmd.Run(); err != nil {
-			fmt.Println("yt-dlp failed to download:", err)
-			return
+			fmt.Println("yt-dlp failed to download:", line,  err)
 		}
 	}
 }
