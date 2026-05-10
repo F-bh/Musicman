@@ -59,10 +59,6 @@ func main() {
 			url,
 		}
 
-		if _, err := os.Stat("yourfile.txt"); err == nil {
-			args = append(args, "--netrc", "--netrc-location", netRcLocation)
-		}
-
 		cmd := exec.Command(exePath, args...)
 		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 		cmd.Stdout = os.Stdout
