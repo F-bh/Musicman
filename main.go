@@ -14,6 +14,7 @@ func main() {
 	exePath := "yt-dlp.exe"
 	outputTemplate := "%(title)s.%(ext)s"
 	playlistFile := filepath.Join("./", "playlists.txt")
+	netRcLocation := filepath.Join("./", "config.netrc")
 
 	file, err := os.Open(playlistFile)
 	if err != nil {
@@ -56,6 +57,10 @@ func main() {
 			"-o", outputTemplate,
 			"--no-abort-on-error",
 			url,
+		}
+		
+		if  _, err := os.Stat(config.netrc); err == nil {
+			args = append(args, "--netrc", "--netrc-location", netRcLocation)
 		}
 
 		cmd := exec.Command(exePath, args...)
