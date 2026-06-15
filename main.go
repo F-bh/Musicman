@@ -59,7 +59,7 @@ func main() {
 			url,
 		}
 		
-		if  _, err := os.Stat(config.netrc); err == nil {
+		if  _, err := os.Stat(netRcLocation); err == nil {
 			args = append(args, "--netrc", "--netrc-location", netRcLocation)
 		}
 
