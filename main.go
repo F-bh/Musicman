@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -69,7 +70,30 @@ func main() {
 		cmd.Stderr = os.Stderr
 
 		if err := cmd.Run(); err != nil {
-			fmt.Println("yt-dlp failed to download:", line,  err)
+			errorMsg := fmt.Sprintf("yt-dlp failed to download: %s - %v", line, err)
+			fmt.Println(errorMsg)
+			logErrorToFile(errorMsg)
 		}
+	}
+}
+
+func logErrorToFile(errorMsg string) {
+	// Create log filename with current date
+	logFileName := fmt.Sprintf("errors_%s.log", time.Now().Format("2006-01-02"))
+	logFilePath := filepath.Join("./", logFileName)
+
+	// Open log file in append mode, create if it doesn't exist
+	logFile, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println("Failed to open log file:", err)
+		return
+	}
+	defer logFile.Close()
+
+	// Write error message with timestamp
+	timestamp := time.Now().Format("2006-01-02 15:04:05")
+	logEntry := fmt.Sprintf("[%s] %s\n", timestamp, errorMsg)
+	if _, err := logFile.WriteString(logEntry); err != nil {
+		fmt.Println("Failed to write to log file:", err)
 	}
 }
