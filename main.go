@@ -79,7 +79,7 @@ func main() {
 
 func logErrorToFile(errorMsg string) {
 	// Create log filename with current date
-	logFileName := fmt.Sprintf("errors_%s.log", time.Now().Format("2006-01-02"))
+	logFileName := fmt.Sprintf("errors.log")
 	logFilePath := filepath.Join("./", logFileName)
 
 	// Open log file in append mode, create if it doesn't exist
