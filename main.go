@@ -66,12 +66,54 @@ func main() {
 
 		cmd := exec.Command(exePath, args...)
 		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
 
-		if err := cmd.Run(); err != nil {
-			errorMsg := fmt.Sprintf("yt-dlp failed to download: %s - %v", line, err)
+		// Capture stdout and stderr so we can scan output line-by-line and log per-item errors
+		stdoutPipe, err := cmd.StdoutPipe()
+		if err != nil {
+			fmt.Println("Failed to get stdout pipe:", err)
+			continue
+		}
+		stderrPipe, err := cmd.StderrPipe()
+		if err != nil {
+			fmt.Println("Failed to get stderr pipe:", err)
+			continue
+		}
+
+		if err := cmd.Start(); err != nil {
+			errorMsg := fmt.Sprintf("yt-dlp failed to start for: %s - %v", line, err)
 			fmt.Println(errorMsg)
+			logErrorToFile(errorMsg)
+			continue
+		}
+
+		// Scan stdout and stderr concurrently. Forward output to the program's stdout/stderr
+		go func() {
+			s := bufio.NewScanner(stdoutPipe)
+			for s.Scan() {
+				text := s.Text()
+				fmt.Fprintln(os.Stdout, text)
+				if strings.Contains(text, "ERROR:") {
+					logErrorToFile(fmt.Sprintf("yt-dlp error for playlist '%s': %s", playListTitle, text))
+				}
+			}
+			// ignore scanner error; if needed, could log it
+		}()
+
+		go func() {
+			s := bufio.NewScanner(stderrPipe)
+			for s.Scan() {
+				text := s.Text()
+				fmt.Fprintln(os.Stderr, text)
+				if strings.Contains(text, "ERROR:") {
+					logErrorToFile(fmt.Sprintf("yt-dlp error for playlist '%s': %s", playListTitle, text))
+				}
+			}
+		}()
+
+		if err := cmd.Wait(); err != nil {
+			errorMsg := fmt.Sprintf("yt-dlp finished with error for: %s - %v", line, err)
+			fmt.Println(errorMsg)
+			// Still log this overall failure, but per-item ERROR: lines will have been logged already
 			logErrorToFile(errorMsg)
 		}
 	}
